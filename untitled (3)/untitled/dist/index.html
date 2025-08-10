@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SuperGrok • Grok 5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --panel:#121318;
+      --panel-2:#171821;
+      --border:#20222b;
+      --text:#e8ecf3;
+      --muted:#9aa3af;
+      --accent:#a6e3ff;
+      --shadow:0 10px 30px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.35);
+      --wrap-w: min(980px, 92vw);
+      --composer-h: 132px; /* JS updates */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 520px at 50% -20%, #141723 0%, var(--bg) 60%);
+      color:var(--text);
+      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow:hidden; /* thread handles scrolling */
+    }
+
+    /* Stars */
+    #stars{position:fixed; inset:0; z-index:0; pointer-events:none;}
+    .star{ position:absolute; width:2px; height:2px; border-radius:50%; background:rgba(255,255,255,.95); opacity:.8; animation:twinkle 3.5s ease-in-out infinite; filter:drop-shadow(0 0 6px rgba(255,255,255,.3)); }
+    .star.s{width:1px;height:1px;opacity:.6;animation-duration:4.6s}
+    .star.l{width:3px;height:3px;opacity:.95;animation-duration:5.2s}
+    @keyframes twinkle{0%,100%{opacity:.45; transform:scale(1)} 50%{opacity:1; transform:scale(1.15)}}
+
+    .wrap{ position:relative; z-index:1; height:100vh; display:flex; flex-direction:column; align-items:center; }
+    .logo{ display:flex; align-items:center; gap:16px; user-select:none; margin-top:40px; margin-bottom:16px; }
+    .logo img{ height:120px; width:auto; filter:drop-shadow(0 6px 18px rgba(0,0,0,.45)); }
+
+    /* Chat */
+    .thread{ width:var(--wrap-w); margin:0 auto; flex:1; overflow-y:auto; padding:8px 2px 24px; padding-bottom:calc(var(--composer-h) + 24px); scroll-behavior:smooth; scrollbar-width:none; -ms-overflow-style:none; -webkit-overflow-scrolling:touch; }
+    .thread::-webkit-scrollbar{ display:none; }
+
+    .message{display:flex; gap:10px; margin:10px 0;}
+    .message .bubble{max-width:86%; padding:12px 14px; border-radius:16px; line-height:1.45; overflow-wrap:anywhere; word-break:break-word;}
+    .message.user{justify-content:flex-end}
+    .message.user .bubble{background:#1a1d27; border:1px solid #222637}
+    .message.ai{justify-content:flex-start}
+    .message.ai .bubble{background:#0d0f15; border:1px solid #1f2330}
+    .meta{font-size:12px; color:var(--muted); margin:4px 4px 0}
+
+    /* Composer */
+    .composer{ position:fixed; left:50%; transform:translate(-50%, 0); bottom:max(16px, env(safe-area-inset-bottom)); width:var(--wrap-w); z-index:3; display:flex; flex-direction:column; gap:8px; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+
+    /* Centered address attached to composer */
+    .addr-wrap{ display:flex; justify-content:center; align-items:center; }
+    #copyAddr{ display:inline-flex; align-items:center; gap:8px; font-size:16.5px; font-weight:700; letter-spacing:.2px; color:#eaf2ff; cursor:pointer; user-select:none; text-shadow:0 2px 6px rgba(0,0,0,.45); }
+    #copyAddr .copy-ic{ width:16px; height:16px; opacity:.9 }
+    #copyAddr.ok{ color:#b7ffd6 }
+
+    .input-row{ display:flex; align-items:center; gap:12px; background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); padding:10px 14px; height:56px; flex:0 0 auto; flex-wrap:nowrap; }
+    .lead-icons{ display:flex; align-items:center; gap:10px; color:var(--muted); }
+    .lead-icons .ic{ width:22px; height:22px; display:grid; place-items:center; border-radius:10px; background:#0f1016; border:1px solid #1e212b}
+    .lead-icons svg{ width:14px; height:14px; opacity:.9 }
+
+    .chip{ font-size:14px; color:var(--muted); display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#0f1117; border:1px solid #1f2330 }
+
+    form{ display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
+    input[type="text"]{ flex:1; background:transparent; border:none; outline:none; color:var(--text); font-size:16px; letter-spacing:.1px; caret-color:#a6e3ff; height:36px; line-height:36px; min-width:0; }
+    input::placeholder{ color:#6c7585 }
+
+    .submit{ position:relative; width:36px; height:36px; border-radius:999px; background: linear-gradient(180deg, #1b2230 0%, #0e1117 100%); border:1px solid #31384b; box-shadow:0 6px 16px rgba(0,0,0,.35), 0 0 0 1px rgba(166,227,255,.06) inset; display:grid; place-items:center; cursor:pointer; transition:transform .08s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease; overflow:hidden; }
+    .submit::after{ content:""; position:absolute; inset:1px; border-radius:inherit; background: linear-gradient(to bottom, rgba(255,255,255,.14), rgba(255,255,255,0) 40%); pointer-events:none; mix-blend-mode:screen; opacity:.6; }
+    .submit:hover{ transform:translateY(-1px); border-color:#3a4157; box-shadow:0 8px 22px rgba(0,0,0,.4), 0 0 0 1px rgba(166,227,255,.12) inset }
+    .submit:active{ transform:translateY(0) scale(.98) }
+    .submit[disabled]{ opacity:.55; cursor:not-allowed }
+    input[disabled]{ opacity:.85 }
+
+    .inline-links{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+    .pill{ position:relative; display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; border:1px solid rgba(70,82,105,.8); background: linear-gradient(180deg, #161a22 0%, #0e1116 100%); color:#dfe7f3; text-decoration:none; font-weight:600; font-size:14px; box-shadow: 0 10px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(166,227,255,.06) inset; transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease; }
+    .pill::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background: linear-gradient(to bottom, rgba(255,255,255,.10), rgba(255,255,255,0) 42%); mix-blend-mode:screen; opacity:.75; }
+    .pill:hover{ transform: translateY(-1px); border-color:#5a6b8b; box-shadow:0 14px 28px rgba(0,0,0,.45), 0 0 0 1px rgba(166,227,255,.14) inset }
+    .pill:active{ transform: translateY(0) scale(.98); }
+
+    /* ===== Full-width bottom blur with fade-in ===== */
+    .bottom-blur{ position:fixed; left:0; right:0; bottom:0; height:0; z-index:2; pointer-events:none; opacity:0; transform:translateY(8px); transition: opacity .28s ease, transform .28s ease, height .28s ease; }
+    .bottom-blur::before{
+      content:""; position:absolute; left:0; right:0; bottom:0; height:100%;
+      backdrop-filter: blur(8px) saturate(1.02);
+      -webkit-backdrop-filter: blur(8px) saturate(1.02);
+      background: linear-gradient(to top, rgba(18,19,24,.92), rgba(18,19,24,.66) 35%, rgba(18,19,24,0) 100%);
+    }
+    body.composer-bottom .bottom-blur{ opacity:1; transform:translateY(0); }
+
+    @media (max-width:520px){ .lead-icons{display:none} .logo img{height:96px} .chip{display:none} .submit{width:40px;height:40px} }
+    @media (prefers-reduced-motion: reduce){ .composer{ transition:none } .thread{ scroll-behavior:auto } .bottom-blur{ transition:none } }
+  </style>
+</head>
+<body>
+  <div id="stars" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <div class="logo" aria-label="Grok 5">
+      <img src="https://i.ibb.co/XZLf1xNQ/Grok-5.png" alt="Grok 5 logo" />
+    </div>
+    <div id="thread" class="thread" role="log" aria-live="polite"></div>
+  </div>
+
+  <div id="composer" class="composer">
+    <!-- Centered address attached to the composer (moves with it) -->
+    <div class="addr-wrap">
+      <div id="copyAddr" role="button" tabindex="0" aria-label="Copy token address">
+        <svg class="copy-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        <span class="addr">2H4y7MHyJDjkaqBbwSRV31MrqUnyU4PF1yvyuvfTpump</span>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <div class="lead-icons" aria-hidden="true">
+        <span class="ic" title="Upload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/></svg>
+        </span>
+        <span class="ic" title="Apps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </span>
+        <span class="ic" title="Ideas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-4 12v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a7 7 0 0 0-4-12Z"/><path d="M9 18h6"/></svg>
+        </span>
+      </div>
+
+      <span class="chip" aria-label="Mode">Expert
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.25 7.5 10 12.25 14.75 7.5"/></svg>
+      </span>
+
+      <form id="promptForm" autocomplete="off" onsubmit="return false" novalidate>
+        <input id="promptInput" type="text" placeholder="The OG, first launched Grok 5 coin on Solana" aria-label="Prompt" />
+        <button class="submit" type="submit" aria-label="Send">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <div class="inline-links">
+      <a class="pill" href="https://dexscreener.com/solana/gkhkacsmjueqaj6ffk5kpznpupt3gszcbdhqwksxbgse" target="_blank" rel="noopener">DexScreener</a>
+      <a class="pill" href="https://x.com/detraderSol" target="_blank" rel="noopener">X/Twitter</a>
+      <a class="pill" href="https://jup.ag/swap?sell=So11111111111111111111111111111111111111112&buy=2H4y7MHyJDjkaqBbwSRV31MrqUnyU4PF1yvyuvfTpump" target="_blank" rel="noopener">Buy $GROK5</a>
+    </div>
+  </div>
+
+  <!-- Full-width blur under composer (visible after docking) -->
+  <div id="bottomBlur" class="bottom-blur" aria-hidden="true"></div>
+
+  <script>
+    // Stars
+    const starHost = document.getElementById('stars');
+    function spawnStars(count=220){
+      if (typeof count !== 'number') count = 220;
+      starHost.innerHTML='';
+      const W = () => window.innerWidth; const H = () => window.innerHeight;
+      for(let i=0;i<count;i++){
+        const s = document.createElement('span');
+        s.className = 'star' + (Math.random()<.2?' l':Math.random()<.6?' s':'');
+        s.style.left = Math.random()*W() + 'px';
+        s.style.top  = Math.random()*H() + 'px';
+        s.style.opacity = (0.50 + Math.random()*0.45).toFixed(2);
+        s.style.animationDelay = (Math.random()*5).toFixed(2)+'s';
+        starHost.appendChild(s);
+      }
+    }
+    spawnStars();
+    const rerenderStars = () => { window.requestAnimationFrame(()=>spawnStars(220)); };
+    window.addEventListener('resize', rerenderStars, {passive:true});
+    window.addEventListener('orientationchange', rerenderStars);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) rerenderStars(); });
+
+    const thread = document.getElementById('thread');
+    const composer = document.getElementById('composer');
+    const bottomBlur = document.getElementById('bottomBlur');
+
+    function updateComposerSpace(){
+      const h = composer.offsetHeight + 10; // small cushion
+      document.documentElement.style.setProperty('--composer-h', h + 'px');
+      thread.style.paddingBottom = `calc(${h}px + 24px)`;
+      bottomBlur.style.height = (h + 10) + 'px';
+    }
+    const ro = new ResizeObserver(()=>{ updateComposerSpace(); });
+    ro.observe(composer);
+    window.addEventListener('resize', ()=>{ updateComposerSpace(); });
+    updateComposerSpace();
+
+    let composerCentered = true;
+    function liftComposerToCenter(){
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        composerCentered = false; composer.style.transform = 'translate(-50%, 0)'; return;
+      }
+      const rect = composer.getBoundingClientRect();
+      const lift = - (window.innerHeight/2 - rect.height/2 - 24);
+      composer.style.transform = `translate(-50%, ${lift}px)`;
+    }
+    function slideComposerDown(){
+      composer.style.transform = 'translate(-50%, 0)';
+      composerCentered = false;
+      document.body.classList.add('composer-bottom');
+      setTimeout(()=>{ updateComposerSpace(); }, 520);
+    }
+    liftComposerToCenter();
+    window.addEventListener('resize', () => { if (composerCentered) liftComposerToCenter(); });
+
+    function scrollToBottom(){ thread.scrollTop = thread.scrollHeight; }
+
+    function addMessage(role, text){
+      const row = document.createElement('div');
+      row.className = `message ${role}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      row.appendChild(bubble);
+      thread.appendChild(row);
+      scrollToBottom();
+      bubble.textContent = text; // default (can be overwritten by typer)
+      return { row, bubble };
+    }
+
+    const form = document.getElementById('promptForm');
+    const input = document.getElementById('promptInput');
+    const submitBtn = form.querySelector('.submit');
+    const REPLY = 'Im not available yet. Stop asking me questions';
+
+    let busy = false;
+
+    function setBusy(state){
+      busy = !!state;
+      input.disabled = busy;
+      submitBtn.disabled = busy;
+      form.setAttribute('aria-busy', busy ? 'true' : 'false');
+    }
+
+    // Typewriter effect for AI replies
+    async function typeInto(el, text){
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduce){ el.textContent = text; return; }
+      el.textContent = '';
+      const tokens = Array.from(text);
+      let i = 0;
+      return new Promise(resolve=>{
+        function tick(){
+          const chunk = Math.random() < 0.85 ? 1 : 2; // occasional double-chars
+          el.textContent += tokens.slice(i, i+chunk).join('');
+          i += chunk;
+          scrollToBottom();
+          if(i < tokens.length){ setTimeout(tick, 14 + Math.random()*26); }
+          else resolve();
+        }
+        tick();
+      });
+    }
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(busy) return; // don't allow while typing
+      const text = input.value.trim();
+      if(!text) return;
+      setBusy(true);
+      if (composerCentered) slideComposerDown();
+
+      // User message
+      addMessage('user', text);
+      input.value = '';
+
+      // Thinking meta
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const thinkTime = (0.8 + Math.random()*0.8).toFixed(1);
+      meta.textContent = `Thought for ${thinkTime}s`;
+      thread.appendChild(meta);
+      scrollToBottom();
+
+      await new Promise(r=>setTimeout(r, parseFloat(thinkTime)*1000));
+      meta.remove();
+
+      // AI message with typing
+      const { bubble } = addMessage('ai', '');
+      await typeInto(bubble, REPLY);
+
+      setBusy(false);
+      input.focus();
+    });
+
+    // Copy-to-clipboard for token address (text only, no extra button)
+    (function(){
+      const copyEl = document.getElementById('copyAddr');
+      if(!copyEl) return;
+      const textEl = copyEl.querySelector('.addr');
+      const value = textEl ? textEl.textContent.trim() : '';
+      async function doCopy(){
+        try{ await navigator.clipboard.writeText(value); }
+        catch(e){
+          const r = document.createRange(); r.selectNodeContents(textEl);
+          const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+          document.execCommand && document.execCommand('copy'); sel.removeAllRanges();
+        }
+        copyEl.classList.add('ok');
+        copyEl.setAttribute('aria-label','Copied');
+        setTimeout(()=>{ copyEl.classList.remove('ok'); copyEl.setAttribute('aria-label','Copy token address'); }, 900);
+      }
+      copyEl.addEventListener('click', doCopy);
+      copyEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); doCopy(); }});
+    })();
+  </script>
+
+  <!-- Full-width blur that covers everything under the composer once it docks -->
+  <div id="bottomBlur2" class="bottom-blur" aria-hidden="true" style="display:none"></div>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
